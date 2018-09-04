@@ -250,7 +250,7 @@ Game::Game() {
          goalPos[0]  = arc4random_uniform(14);
          goalPos[1] =  arc4random_uniform(11);
       }
-      boardState[playerPos[0]][playerPos[1]] = 6;
+      boardState[playerPos[0]][playerPos[1]] = 0;
       boardState[goalPos[0]][goalPos[1]]=7;
       points = 0;
    }
@@ -280,7 +280,7 @@ Game::~Game() {
 }
 
 bool Game::handle_event(SDL_Event const &evt, glm::uvec2 window_size) {
-   //ignore any keys that are the result of automatic key repeat:
+  //ignore any keys that are the result of automatic key repeat:
    if (evt.type == SDL_KEYDOWN && evt.key.repeat) {
       return false;
    }
@@ -352,40 +352,39 @@ else{
             break;
          case 2:   //goop
             isMoving = false;
-            boardState[playerPos[0]][playerPos[1]] = 0;
+            //boardState[playerPos[0]][playerPos[1]] = 0;
             playerPos[0] = nextX;
                playerPos[1] = nextY;
-               boardState[nextX][nextY] = 6 ;
+               //boardState[nextX][nextY] = 6 ;
                break;
          case 3:   //checkpoint
-            boardState[playerPos[0]][playerPos[1]] = 0;
+            //boardState[playerPos[0]][playerPos[1]] = 0;
                playerPos[0] = nextX;
                playerPos[1] = nextY;
 
-               boardState[nextX][nextY] = 6; 
+               boardState[nextX][nextY] = 0; 
                points = points+1;
                break;
          case 7:   //goal
             isMoving = false;
-               boardState[playerPos[0]][playerPos[1]] = 0;
+              // boardState[playerPos[0]][playerPos[1]] = 0;
                playerPos[0] = nextX;
                playerPos[1] = nextY;
 
 
-               boardState[nextX][nextY] = 6; 
+               //boardState[nextX][nextY] = ; 
                break;
          case 0:   //nothing
-            boardState[playerPos[0]][playerPos[1]] = 0;
+            //boardState[playerPos[0]][playerPos[1]] = 0;
                playerPos[0] = nextX;
                playerPos[1] = nextY;
 
-               boardState[nextX][nextY] = 6;            
+               //boardState[nextX][nextY] = 6;            
                break;}  
 
 
    }
    else{
-      isMoving = false;
 
       //if the roll keys are pressed, rotate everything on the same row or column as the cursor:
       if (controls.roll_left) {
@@ -513,14 +512,7 @@ void Game::draw(glm::uvec2 drawable_size) {
                                 float(x)+1.0, float(y)+1.0, 0.5f, 3.0f
                                 ));
                        break;
-               case 6: draw_mesh(player_mesh, glm::mat4(
-                                0.4f, 0.0f, 0.0f, 0.0f,
-                                0.0f, 0.4f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 1.0f, 0.0f,
-                                float(x)+1.0, float(y)+1.0, 0.5f, 3.0f
-                                ));
-                       break;
-               case 7: draw_mesh(goal_mesh, glm::mat4(
+              case 7: draw_mesh(goal_mesh, glm::mat4(
                                 0.4f, 0.0f, 0.0f, 0.0f,
                                 0.0f, 0.4f, 0.0f, 0.0f,
                                 0.0f, 0.0f, 1.0f, 0.0f,
@@ -534,6 +526,27 @@ void Game::draw(glm::uvec2 drawable_size) {
          }
 
       }
+
+      draw_mesh(player_mesh, glm::mat4(
+                                0.4f, 0.0f, 0.0f, 0.0f,
+                                0.0f, 0.4f, 0.0f, 0.0f,
+                                0.0f, 0.0f, 1.0f, 0.0f,
+                                playerPos[0]+1.0, playerPos[1]+1.0, 0.75f, 3.0f
+                                ));
+   
+      //draw game points
+      for (int i=0; i<points; i++){
+ draw_mesh(checkpoint_mesh, glm::mat4(
+                                0.05f, 0.0f, 0.0f, 0.0f,
+                                0.0f, 0.05f, 0.0f, 0.0f,
+                                0.0f, 0.0f, 1.0f, 0.0f,
+                                15.0, 11.0-0.25*i, 0.75f, 3.0f
+                                ));
+   
+
+
+      }
+              
    };
    draw_board();
 
