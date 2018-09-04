@@ -58,11 +58,12 @@ struct Game {
 		GLsizei count = 0;
 	};
 
-	Mesh tile_mesh;
-	Mesh cursor_mesh;
-	Mesh doll_mesh;
-	Mesh egg_mesh;
-	Mesh cube_mesh;
+	Mesh checkpoint_mesh;
+	Mesh floor_mesh;
+	Mesh wall_mesh;
+	Mesh goop_mesh;
+	Mesh player_mesh;
+        Mesh goal_mesh;
 
 	GLuint meshes_for_simple_shading_vao = -1U; //vertex array object that describes how to connect the meshes_vbo to the simple_shading_program
 

@@ -81,14 +81,21 @@ for name in to_write:
 
 	uvs = None
 
-	#referenced from game 3 code
  
-	colors = obj.data.vertex_colors.active.data
 	if do_texcoord:
 		if len(obj.data.uv_layers) == 0:
 			print("WARNING: trying to export texcoord data, but object '" + name + "' does not uv data; will output (0.0, 0.0)")
 		else:
 			uvs = obj.data.uv_layers.active.data
+	colors = None
+
+	#referenced from game 3 code
+ 
+	if do_texcoord:
+		if len(obj.data.vertex_colors) == 0:
+			print("WARNING: trying to export texcoord data, but object '" + name + "' does not color  data; will output white")
+		else:
+			colors = obj.data.vertex_colors.active.data
 	#temp
         #write the mesh:
 	for poly in mesh.polygons:
@@ -106,6 +113,13 @@ for name in to_write:
 			#referenced from game 3 code
 			col = colors[poly.loop_indices[i]].color
 			data += struct.pack('BBBB', int(col.r * 255), int(col.g * 255), int(col.b * 255), 255)
+			if False:
+				if colors != None:
+					col = colors[poly.loop_indices[i]].color
+					data += struct.pack('BBBB', int(col.r * 255), int(col.g * 255), int(col.b * 255), 255)
+				#else:
+					#col = mathutils.Color((1.0, 1.0, 1.0))
+					#data += struct.pack('BBBB', int(col.r * 255), int(col.g * 255), int(col.b * 255), 255)
 			if do_texcoord:
 				if uvs != None:
 					uv = uvs[poly.loop_indices[i]].uv

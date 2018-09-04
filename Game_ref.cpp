@@ -12,18 +12,6 @@
 #include <cstddef>
 #include <random>
 
-#include <stdio.h>      /* printf, scanf, puts, NULL */
-#include <stdlib.h>     /* srand, rand */
-
-
-int boardState[14][11];
-int playerPos[2] = {-1,-1};
-int goalPos[2] = {-1,-1};
-bool isMoving = false;
-int direction = 0; //0 is north, 1 is east, 2 is south, 3 is west
-
-
-
 //helper defined later; throws if shader compilation fails:
 static GLuint compile_shader(GLenum type, std::string const &source);
 
@@ -185,12 +173,11 @@ Game::Game() {
 			}
 			return f->second;
 		};
-		checkpoint_mesh = lookup("Checkpoint");
-		floor_mesh = lookup("Floor");
-		wall_mesh = lookup("Wall");
-		goal_mesh = lookup("Goal");
-	        player_mesh = lookup("Player");
-                goop_mesh = lookup("Goop");
+		tile_mesh = lookup("Tile");
+		cursor_mesh = lookup("Cursor");
+		doll_mesh = lookup("Doll");
+		egg_mesh = lookup("Egg");
+		cube_mesh = lookup("Cube");
 	}
 
 	{ //create vertex array object to hold the map from the mesh vertex buffer to shader program attributes:
@@ -219,51 +206,12 @@ Game::Game() {
 	board_rotations.reserve(board_size.x * board_size.y);
 	std::mt19937 mt(0xbead1234);
 
-      auto goalReachable = [&](){
-            if (playerPos[0]==-1){return false;}
-            else{
-            return true;} 
-         };        
-
-      while(goalReachable() == false){ 
-         for (int x=0; x<14;x++){
-         for (int y=0; y<14; y++){  
-            int rnum = arc4random_uniform(5);
-            if (rnum == 4) {
-               rnum = 0;
-            }
-            boardState[x][y] = rnum;
-            // 0 is plain
-            // 1 is wall
-            //2 is goop
-            //3 is checkpoint
-            
-         }
-
-          }
-         
-         playerPos[0] = arc4random_uniform(14);
-         playerPos[1] =  arc4random_uniform(11);
-         goalPos[0] = arc4random_uniform(14);
-         goalPos[1] =  arc4random_uniform(11);
-         while ((playerPos[0] == goalPos[0]) && (playerPos[1] == goalPos[1]) ){
-         goalPos[0]  = arc4random_uniform(14);
-         goalPos[1] =  arc4random_uniform(11);
-         }
-         boardState[playerPos[0]][playerPos[1]] = 6;
-         boardState[goalPos[0]][goalPos[1]]=7;
-
-   }
- 
-         
-        
-	std::vector< Mesh const * > meshes{ &player_mesh, &checkpoint_mesh, &goal_mesh };
+	std::vector< Mesh const * > meshes{ &doll_mesh, &egg_mesh, &cube_mesh };
 
 	for (uint32_t i = 0; i < board_size.x * board_size.y; ++i) {
 		board_meshes.emplace_back(meshes[mt()%meshes.size()]);
 		board_rotations.emplace_back(glm::quat());
 	}
-         
 }
 
 Game::~Game() {
@@ -328,7 +276,6 @@ bool Game::handle_event(SDL_Event const &evt, glm::uvec2 window_size) {
 }
 
 void Game::update(float elapsed) {
-  /*
 	//if the roll keys are pressed, rotate everything on the same row or column as the cursor:
 	glm::quat dr = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	float amt = elapsed * 1.0f;
@@ -356,7 +303,6 @@ void Game::update(float elapsed) {
 			}
 		}
 	}
-*/
 }
 
 void Game::draw(glm::uvec2 drawable_size) {
@@ -412,68 +358,43 @@ void Game::draw(glm::uvec2 drawable_size) {
 		glDrawArrays(GL_TRIANGLES, mesh.first, mesh.count);
 	};
 
- auto  draw_board = [&](){
-            for (int x=0; x<14;x++){
-               for (int y=0; y<11; y++){
-                  switch(boardState[x][y]) {
-                       case 0 : /*draw_mesh(floor_mesh, glm::mat4(
-                        0.4f, 0.0f, 0.0f, 0.0f,
-                        0.0f, 0.4f, 0.0f, 0.0f,
-                        0.0f, 0.0f, 1.0f, 0.0f,
-                        float(x)+1.0, float(y)+1.0, 0.5f, 3.0f
-                ));*/
-                               break;
-                      case 1 : draw_mesh(wall_mesh, glm::mat4(
-                        0.4f, 0.0f, 0.0f, 0.0f,
-                        0.0f, 0.4f, 0.0f, 0.0f,
-                        0.0f, 0.0f, 1.0f, 0.0f,
-                        float(x)+1.0, float(y)+1.0, 0.5f, 3.0f
-                ));
-                               break;
-            
-                      case 2: draw_mesh(goop_mesh, glm::mat4(
-                        0.4f, 0.0f, 0.0f, 0.0f,
-                        0.0f, 0.4f, 0.0f, 0.0f,
-                        0.0f, 0.0f, 1.0f, 0.0f,
-                        float(x)+1.0, float(y)+1.0, 0.5f, 3.0f
-                ));
-                        break;
-                       case 3: draw_mesh(checkpoint_mesh, glm::mat4(
-                        0.4f, 0.0f, 0.0f, 0.0f,
-                        0.0f, 0.4f, 0.0f, 0.0f,
-                        0.0f, 0.0f, 1.0f, 0.0f,
-                        float(x)+1.0, float(y)+1.0, 0.5f, 3.0f
-                ));
-	                   break;
-	                 case 6: draw_mesh(player_mesh, glm::mat4(
-                        0.4f, 0.0f, 0.0f, 0.0f,
-                        0.0f, 0.4f, 0.0f, 0.0f,
-                        0.0f, 0.0f, 1.0f, 0.0f,
-                        float(x)+1.0, float(y)+1.0, 0.5f, 3.0f
-                ));
-	                   break;
-	               case 7: draw_mesh(goal_mesh, glm::mat4(
-                        0.4f, 0.0f, 0.0f, 0.0f,
-                        0.0f, 0.4f, 0.0f, 0.0f,
-                        0.0f, 0.0f, 1.0f, 0.0f,
-                        float(x)+1.0, float(y)+1.0, 0.5f, 3.0f
-                ));
-	                   break;
-	
-                  } 
+	for (uint32_t y = 0; y < board_size.y; ++y) {
+		for (uint32_t x = 0; x < board_size.x; ++x) {
+			draw_mesh(tile_mesh,
+				glm::mat4(
+					1.0f, 0.0f, 0.0f, 0.0f,
+					0.0f, 1.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 1.0f, 0.0f,
+					x+0.5f, y+0.5f,-0.5f, 1.0f
+				)
+			);
+			draw_mesh(*board_meshes[y*board_size.x+x],
+				glm::mat4(
+					1.0f, 0.0f, 0.0f, 0.0f,
+					0.0f, 1.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 1.0f, 0.0f,
+					x+0.5f, y+0.5f, 0.0f, 1.0f
+				)
+				* glm::mat4_cast(board_rotations[y*board_size.x+x])
+			);
+		}
+	}
+	draw_mesh(cursor_mesh,
+		glm::mat4(
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			cursor.x+0.5f, cursor.y+0.5f, 0.0f, 1.0f
+		)
+	);
 
-
-               }
-
-            }
-       };
-       draw_board();
-       	
 
 	glUseProgram(0);
 
 	GL_ERRORS();
 }
+
+
 
 //create and return an OpenGL vertex shader from source:
 static GLuint compile_shader(GLenum type, std::string const &source) {
