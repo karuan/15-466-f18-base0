@@ -80,6 +80,7 @@ struct Game {
 		bool roll_right = false;
 		bool roll_up = false;
 		bool roll_down = false;
-	} controls;
+                bool reset = false;
+   	} controls;
 
 };

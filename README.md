@@ -1,11 +1,13 @@
 # Game Information
 (Note: fill in this portion with information about your game.)
 
-Title: (TODO: your game's title)
+Title: Stickochet robot
 
-Author: (TODO: your name)
+Author: Kathleen Ruan (kruan)
 
-Design Document: [TODO: name of design document](TODO: link to design document)
+Worked with John Shi (jshi3) on figuring how to render graphics, no code or assets were duplicated other than changes to export-python.py
+
+Design Document: [Stickoshet Robot](http://graphics.cs.cmu.edu/courses/15-466-f18/game0-designs/default/)
 
 Screen Shot:
 
@@ -13,11 +15,16 @@ Screen Shot:
 
 Difficulties Encountered:
 
-TODO: write several sentences about any difficulties you may have encountered in creating the game.
+Figuring out how to render the graphics; keeping the updating and drawing in sync. The feasibility solver is not yet completed.
 
 Good Code:
 
-TODO: write a sentence or two about any code you think you did particularly well.
+Keeping track of state changes between turns.
+
+
+# Gameplay
+AWSD to move, R to reset
+
 
 # Using This Base Code
 

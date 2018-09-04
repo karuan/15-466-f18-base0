@@ -27,6 +27,41 @@ float timePassed = 0;
 //helper defined later; throws if shader compilation fails:
 static GLuint compile_shader(GLenum type, std::string const &source);
 
+
+void resetGame(){
+   for (int x=0; x<14;x++){
+         for (int y=0; y<14; y++){  
+            int rnum = arc4random_uniform(15);
+            if (rnum >= 4) {
+               rnum = 0;
+            }
+            boardState[x][y] = rnum;
+            // 0 is plain
+            // 1 is wall
+            //2 is goop
+            //3 is checkpoint
+
+         }
+
+      }
+
+      playerPos[0] = arc4random_uniform(14);
+      playerPos[1] =  arc4random_uniform(11);
+      goalPos[0] = arc4random_uniform(14);
+      goalPos[1] =  arc4random_uniform(11);
+      while ((playerPos[0] == goalPos[0]) && (playerPos[1] == goalPos[1]) ){
+         goalPos[0]  = arc4random_uniform(14);
+         goalPos[1] =  arc4random_uniform(11);
+      }
+      boardState[playerPos[0]][playerPos[1]] = 0;
+      boardState[goalPos[0]][goalPos[1]]=7;
+      points = 0;
+
+      isMoving=false;
+
+}
+
+
 Game::Game() {
    { //create an opengl program to perform sun/sky (well, directional+hemispherical) lighting:
       GLuint vertex_shader = compile_shader(GL_VERTEX_SHADER,
@@ -226,34 +261,8 @@ Game::Game() {
    };        
 
    while(goalReachable() == false){ 
-      for (int x=0; x<14;x++){
-         for (int y=0; y<14; y++){  
-            int rnum = arc4random_uniform(5);
-            if (rnum == 4) {
-               rnum = 0;
-            }
-            boardState[x][y] = rnum;
-            // 0 is plain
-            // 1 is wall
-            //2 is goop
-            //3 is checkpoint
-
-         }
-
+      resetGame();
       }
-
-      playerPos[0] = arc4random_uniform(14);
-      playerPos[1] =  arc4random_uniform(11);
-      goalPos[0] = arc4random_uniform(14);
-      goalPos[1] =  arc4random_uniform(11);
-      while ((playerPos[0] == goalPos[0]) && (playerPos[1] == goalPos[1]) ){
-         goalPos[0]  = arc4random_uniform(14);
-         goalPos[1] =  arc4random_uniform(11);
-      }
-      boardState[playerPos[0]][playerPos[1]] = 0;
-      boardState[goalPos[0]][goalPos[1]]=7;
-      points = 0;
-   }
 
 
 
@@ -299,6 +308,11 @@ bool Game::handle_event(SDL_Event const &evt, glm::uvec2 window_size) {
          controls.roll_right = (evt.type == SDL_KEYDOWN);
          return true;
       }
+      else if (evt.key.keysym.scancode == SDL_SCANCODE_R) {
+         controls.reset = (evt.type == SDL_KEYDOWN);
+         return true;
+      }
+
    }
    //move cursor on L/R/U/D press:
    if (evt.type == SDL_KEYUP && evt.key.repeat == 0) {
@@ -421,6 +435,11 @@ else{
          return;
      
         //	dr = glm::angleAxis(-amt, glm::vec3(1.0f, 0.0f, 0.0f)) * dr;
+      }
+      if (controls.reset){
+         resetGame();
+         return;
+
       }
    
    }
